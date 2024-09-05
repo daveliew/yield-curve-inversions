@@ -22,6 +22,7 @@ export default function Home() {
         <ChartComponent />
         <SpreadHistogram data={histogramData} />
       </div>
+      
     </main>
   );
 }

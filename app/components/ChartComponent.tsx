@@ -11,20 +11,23 @@ import {
   Legend,
 } from 'chart.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// Define an interface for the chart data structure
+interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    borderColor: string;
+    tension: number;
+  }[];
+}
 
-const ChartComponent = () => {
-  const [chartData, setChartData] = useState(null);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+function ChartComponent({ chartData: initialChartData }: { chartData: ChartData }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<ChartData>(initialChartData);
 
   useEffect(() => {
     fetch('/api/yieldData')
@@ -68,12 +71,12 @@ const ChartComponent = () => {
       },
       title: {
         display: true,
-        text: 'Yield Curve',
+        text: 'Yield Curve Chart',
       },
     },
   };
 
   return <Line options={options} data={chartData} />;
-};
+}
 
 export default ChartComponent;
