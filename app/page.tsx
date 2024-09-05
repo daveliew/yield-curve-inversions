@@ -3,6 +3,12 @@
 import ChartComponent from './components/ChartComponent';
 import SpreadHistogram from './components/SpreadHistogram';
 
+// Add a default or placeholder chart data
+const placeholderChartData = {
+  labels: [],
+  datasets: []
+};
+
 const histogramData = {
   labels: ['-2', '-1.5', '-1', '-0.5', '0', '0.5', '1', '1.5', '2'],
   datasets: [
@@ -19,10 +25,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center p-8">
       <h1 className="text-4xl font-bold mb-8">Yield Curve Visualizer</h1>
       <div className="w-full max-w-7xl space-y-8">
-        <ChartComponent />
+        <ChartComponent chartData={placeholderChartData} />
         <SpreadHistogram data={histogramData} />
       </div>
-      
     </main>
   );
 }
