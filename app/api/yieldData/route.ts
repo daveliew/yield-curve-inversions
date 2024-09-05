@@ -6,20 +6,55 @@ const BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
 
 export async function GET() {
   try {
-    const [twoYearData, tenYearData] = await Promise.all([
-      axios.get(`${BASE_URL}?series_id=DGS2&api_key=${FRED_API_KEY}&file_type=json`),
-      axios.get(`${BASE_URL}?series_id=DGS10&api_key=${FRED_API_KEY}&file_type=json`)
+    console.log('Fetching data...');
+    
+    const twoYearUrl = `${BASE_URL}?series_id=DGS2&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
+    const tenYearUrl = `${BASE_URL}?series_id=DGS10&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
+    
+    const [twoYearResponse, tenYearResponse] = await Promise.all([
+      fetch(twoYearUrl),
+      fetch(tenYearUrl)
     ]);
 
-    const processedData = processData(twoYearData.data.observations, tenYearData.data.observations);
+    const twoYearData = await twoYearResponse.json();
+    const tenYearData = await tenYearResponse.json();
+
+    console.log('Data fetched successfully');
+    console.log('Two Year Data:', twoYearData);
+    console.log('Ten Year Data:', tenYearData);
+
+    if (!twoYearData.observations || !tenYearData.observations) {
+      throw new Error('Invalid data structure received from FRED API');
+    }
+
+    const processedData = processData(twoYearData.observations, tenYearData.observations);
     return NextResponse.json(processedData);
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching data from FRED API' }, { status: 500 });
+    console.error('Error fetching or processing data:', error);
+    return NextResponse.json({ error: 'An error occurred while fetching or processing data' }, { status: 500 });
   }
 }
 
 function processData(twoYearData: any[], tenYearData: any[]) {
-  // Implement data processing logic here
-  // This should combine the two datasets and calculate the spread
-  // Return an object with data for the line chart and histogram
+  const labels = twoYearData.map(item => item.date);
+  const twoYearValues = twoYearData.map(item => parseFloat(item.value));
+  const tenYearValues = tenYearData.map(item => parseFloat(item.value));
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: '2 Year Treasury Rate',
+        data: twoYearValues,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      },
+      {
+        label: '10 Year Treasury Rate',
+        data: tenYearValues,
+        borderColor: 'rgb(255, 99, 132)',
+        tension: 0.1
+      }
+    ]
+  };
 }
