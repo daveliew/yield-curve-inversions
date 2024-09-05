@@ -20,8 +20,6 @@ export async function GET() {
     const tenYearData = await tenYearResponse.json();
 
     console.log('Data fetched successfully');
-    console.log('Two Year Data:', twoYearData);
-    console.log('Ten Year Data:', tenYearData);
 
     if (!twoYearData.observations || !tenYearData.observations) {
       throw new Error('Invalid data structure received from FRED API');
