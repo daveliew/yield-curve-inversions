@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { NextResponse } from 'next/server';
 
 const FRED_API_KEY = process.env.FRED_API_KEY;
@@ -33,7 +32,13 @@ export async function GET() {
   }
 }
 
-function processData(twoYearData: any[], tenYearData: any[]) {
+// Define an interface for the observation data
+interface Observation {
+  date: string;
+  value: string;
+}
+
+function processData(twoYearData: Observation[], tenYearData: Observation[]) {
   const labels = twoYearData.map(item => item.date);
   const twoYearValues = twoYearData.map(item => parseFloat(item.value));
   const tenYearValues = tenYearData.map(item => parseFloat(item.value));
