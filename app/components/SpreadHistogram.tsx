@@ -4,6 +4,7 @@ import {
   ChartOptions,
   registerables,
 } from 'chart.js';
+import 'chartjs-adapter-date-fns'; // Import the date adapter
 
 ChartJS.register(...registerables);
 
@@ -38,6 +39,28 @@ export default function SpreadHistogram({ data, duration1, duration2 }: SpreadHi
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    scales: {
+      x: {
+        type: 'time', // Ensure the x-axis is a time scale
+        time: {
+          tooltipFormat: 'MMM YYYY', // Format for tooltip
+          displayFormats: {
+            month: 'MMM YYYY', // Format for x-axis labels
+          },
+        },
+        title: {
+          display: true,
+          text: 'Year',
+        },
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Spread (Percentage Points)',
+        },
+      },
+    },
     plugins: {
       legend: {
         position: 'top' as const,
@@ -71,26 +94,11 @@ export default function SpreadHistogram({ data, duration1, duration2 }: SpreadHi
         ctx.restore();
       },
     },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Spread (Percentage Points)',
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-        },
-      },
-    },
   };
 
-  // Update the datasets to use the defined colors
+  // Ensure your labels are in date format
   const histogramData = {
-    labels: data.labels,
+    labels: data.labels.map(label => new Date(label)), // Convert labels to Date objects
     datasets: [
       {
         label: `Spread (${duration1} - ${duration2})`,

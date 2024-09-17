@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const FRED_API_KEY = process.env.FRED_API_KEY;
 const BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
 
-const SERIES_IDS = {
+const SERIES_IDS: { [key: string]: string } = {
   '1': 'DGS1',
   '2': 'DGS2',
   '5': 'DGS5',
@@ -13,8 +13,8 @@ const SERIES_IDS = {
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const duration1 = searchParams.get('duration1') || '5';
-  const duration2 = searchParams.get('duration2') || '10';
+  const duration1: keyof typeof SERIES_IDS = searchParams.get('duration1') || '5';
+  const duration2: keyof typeof SERIES_IDS = searchParams.get('duration2') || '10';
 
   try {
     console.log('Fetching data...');

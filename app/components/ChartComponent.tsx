@@ -27,9 +27,10 @@ export default function YieldChart() {
     }
   };
 
-  const handleDurationChange = (setter) => (event) => {
-    setter(event.target.value);
-  };
+  const handleDurationChange = (setDuration: React.Dispatch<React.SetStateAction<string>>) => 
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setDuration(event.target.value);
+    };
 
   if (!chartData) return <div className="loading">Loading...</div>;
 
