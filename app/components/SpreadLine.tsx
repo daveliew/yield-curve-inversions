@@ -21,7 +21,7 @@ interface SpreadHistogramProps {
   duration2: string;
 }
 
-const SpreadHistogram = ({ data, duration1, duration2 }: SpreadHistogramProps) => {
+const SpreadLine = ({ data, duration1, duration2 }: SpreadHistogramProps) => {
   if (!data || !data.datasets || data.datasets.length < 2) {
     return <div>No data available or insufficient datasets</div>;
   }
@@ -69,7 +69,7 @@ const SpreadHistogram = ({ data, duration1, duration2 }: SpreadHistogramProps) =
     },
   };
 
-  const histogramData = {
+  const spreadData = {
     labels: data.labels.map(label => new Date(label)),
     datasets: [
       {
@@ -83,7 +83,7 @@ const SpreadHistogram = ({ data, duration1, duration2 }: SpreadHistogramProps) =
     ],
   };
 
-  return <Line options={options} data={histogramData} />;
+  return <Line options={options} data={spreadData} />;
 };
 
-export default SpreadHistogram;
+export default SpreadLine; // Update export to SpreadLine
