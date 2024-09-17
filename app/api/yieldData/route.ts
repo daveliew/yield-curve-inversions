@@ -1,30 +1,42 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const FRED_API_KEY = process.env.FRED_API_KEY;
 const BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
 
-export async function GET() {
+const SERIES_IDS = {
+  '1': 'DGS1',
+  '2': 'DGS2',
+  '5': 'DGS5',
+  '10': 'DGS10',
+  '30': 'DGS30'
+};
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const duration1 = searchParams.get('duration1') || '5';
+  const duration2 = searchParams.get('duration2') || '10';
+
   try {
     console.log('Fetching data...');
     
-    const twoYearUrl = `${BASE_URL}?series_id=DGS2&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
-    const tenYearUrl = `${BASE_URL}?series_id=DGS10&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
+    const url1 = `${BASE_URL}?series_id=${SERIES_IDS[duration1]}&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
+    const url2 = `${BASE_URL}?series_id=${SERIES_IDS[duration2]}&api_key=${FRED_API_KEY}&file_type=json&observation_start=1990-01-01&frequency=m`;
     
-    const [twoYearResponse, tenYearResponse] = await Promise.all([
-      fetch(twoYearUrl),
-      fetch(tenYearUrl)
+    const [response1, response2] = await Promise.all([
+      fetch(url1),
+      fetch(url2)
     ]);
 
-    const twoYearData = await twoYearResponse.json();
-    const tenYearData = await tenYearResponse.json();
+    const data1 = await response1.json();
+    const data2 = await response2.json();
 
     console.log('Data fetched successfully');
 
-    if (!twoYearData.observations || !tenYearData.observations) {
+    if (!data1.observations || !data2.observations) {
       throw new Error('Invalid data structure received from FRED API');
     }
 
-    const processedData = processData(twoYearData.observations, tenYearData.observations);
+    const processedData = processData(data1.observations, data2.observations, duration1, duration2);
     return NextResponse.json(processedData);
   } catch (error) {
     console.error('Error fetching or processing data:', error);
@@ -38,23 +50,23 @@ interface Observation {
   value: string;
 }
 
-function processData(twoYearData: Observation[], tenYearData: Observation[]) {
-  const labels = twoYearData.map(item => item.date);
-  const twoYearValues = twoYearData.map(item => parseFloat(item.value));
-  const tenYearValues = tenYearData.map(item => parseFloat(item.value));
+function processData(data1: Observation[], data2: Observation[], duration1: string, duration2: string) {
+  const labels = data1.map(item => item.date);
+  const values1 = data1.map(item => parseFloat(item.value));
+  const values2 = data2.map(item => parseFloat(item.value));
 
   return {
     labels,
     datasets: [
       {
-        label: '2 Year Treasury Rate',
-        data: twoYearValues,
+        label: `${duration1} Year Treasury Rate`,
+        data: values1,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1
       },
       {
-        label: '10 Year Treasury Rate',
-        data: tenYearValues,
+        label: `${duration2} Year Treasury Rate`,
+        data: values2,
         borderColor: 'rgb(255, 99, 132)',
         tension: 0.1
       }

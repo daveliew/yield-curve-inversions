@@ -1,82 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-// Define an interface for the chart data structure
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor: string;
-    tension: number;
-  }[];
-}
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-function ChartComponent({ chartData: initialChartData }: { chartData: ChartData }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [chartData, setChartData] = useState<ChartData>(initialChartData);
+const durations = ['1', '2', '5', '10', '30'];
+
+export default function YieldChart() {
+  const [chartData, setChartData] = useState(null);
+  const [duration1, setDuration1] = useState('5');
+  const [duration2, setDuration2] = useState('10');
 
   useEffect(() => {
-    fetch('/api/yieldData')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!data || !data.labels) {
-          throw new Error('Data is not in the expected format');
-        }
-        setChartData(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        setError(error.message);
-        setIsLoading(false);
-      });
-  }, []);
+    fetchData();
+  }, [duration1, duration2]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!chartData || !chartData.labels) {
-    return <div>No data available</div>;
-  }
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'Yield Curve Chart',
-      },
-    },
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`/api/yieldData?duration1=${duration1}&duration2=${duration2}`);
+      const data = await response.json();
+      setChartData(data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
-  return <Line options={options} data={chartData} />;
-}
+  const handleDurationChange = (setter) => (event) => {
+    setter(event.target.value);
+  };
 
-export default ChartComponent;
+  if (!chartData) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <div>
+        <select value={duration1} onChange={handleDurationChange(setDuration1)}>
+          {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
+        </select>
+        <select value={duration2} onChange={handleDurationChange(setDuration2)}>
+          {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
+        </select>
+      </div>
+      <Line data={chartData} />
+    </div>
+  );
+}
