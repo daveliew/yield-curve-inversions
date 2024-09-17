@@ -22,7 +22,7 @@ interface SpreadHistogramProps {
 }
 
 const SpreadLine = ({ data, duration1, duration2 }: SpreadHistogramProps) => {
-  if (!data || !data.datasets || data.datasets.length < 2) {
+  if (!data || !data.datasets || !Array.isArray(data.datasets) || data.datasets.length < 2) {
     return <div>No data available or insufficient datasets</div>;
   }
 
@@ -40,7 +40,6 @@ const SpreadLine = ({ data, duration1, duration2 }: SpreadHistogramProps) => {
       x: {
         type: 'time',
         time: {
-          tooltipFormat: 'MMM YYYY',
           displayFormats: {
             month: 'MMM YYYY',
           },
