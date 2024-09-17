@@ -8,8 +8,8 @@ const durations = ['1', '2', '5', '10', '30'];
 
 export default function YieldChart() {
   const [chartData, setChartData] = useState(null);
-  const [duration1, setDuration1] = useState('5');
-  const [duration2, setDuration2] = useState('10');
+  const [duration1, setDuration1] = useState('2'); // Set default to 2 years
+  const [duration2, setDuration2] = useState('10'); // Set default to 10 years
 
   useEffect(() => {
     fetchData();
@@ -29,19 +29,37 @@ export default function YieldChart() {
     setter(event.target.value);
   };
 
-  if (!chartData) return <div>Loading...</div>;
+  if (!chartData) return <div className="loading">Loading...</div>;
 
   return (
-    <div>
-      <div>
-        <select value={duration1} onChange={handleDurationChange(setDuration1)}>
-          {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
-        </select>
-        <select value={duration2} onChange={handleDurationChange(setDuration2)}>
-          {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
-        </select>
+    <div className="yield-chart">
+      <div className="dropdown-container">
+        <div className="dropdown-wrapper">
+          <label htmlFor="duration1">First Duration:</label>
+          <select
+            id="duration1"
+            value={duration1}
+            onChange={handleDurationChange(setDuration1)}
+            className="dropdown"
+          >
+            {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
+          </select>
+        </div>
+        <div className="dropdown-wrapper">
+          <label htmlFor="duration2">Second Duration:</label>
+          <select
+            id="duration2"
+            value={duration2}
+            onChange={handleDurationChange(setDuration2)}
+            className="dropdown"
+          >
+            {durations.map(d => <option key={d} value={d}>{d} Year</option>)}
+          </select>
+        </div>
       </div>
-      <Line data={chartData} />
+      <div className="chart-wrapper">
+        <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+      </div>
     </div>
   );
 }
