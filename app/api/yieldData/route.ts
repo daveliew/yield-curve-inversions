@@ -61,13 +61,13 @@ function processData(data1: Observation[], data2: Observation[], duration1: stri
       {
         label: `${duration1} Year Treasury Rate`,
         data: values1,
-        borderColor: 'rgb(75, 192, 192)',
+        borderColor: '#4B3F8C', // Dark Purple for the first duration
         tension: 0.1
       },
       {
         label: `${duration2} Year Treasury Rate`,
         data: values2,
-        borderColor: 'rgb(255, 99, 132)',
+        borderColor: '#00FFA3', // Bright Cyan for the second duration
         tension: 0.1
       }
     ]

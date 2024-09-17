@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import SpreadHistogram from './SpreadHistogram'; // Import the SpreadHistogram component
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -19,6 +20,7 @@ export default function YieldChart() {
     try {
       const response = await fetch(`/api/yieldData?duration1=${duration1}&duration2=${duration2}`);
       const data = await response.json();
+      console.log('Fetched Data:', data); // Log the fetched data
       setChartData(data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -60,6 +62,8 @@ export default function YieldChart() {
       <div className="chart-wrapper">
         <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
       </div>
+      {/* Pass the selected durations and chart data to the SpreadHistogram component */}
+      <SpreadHistogram data={chartData} duration1={duration1} duration2={duration2} />
     </div>
   );
 }
