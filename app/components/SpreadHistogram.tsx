@@ -4,7 +4,7 @@ import {
   ChartOptions,
   registerables,
 } from 'chart.js';
-import 'chartjs-adapter-date-fns'; // Import the date adapter
+import 'chartjs-adapter-date-fns';
 
 ChartJS.register(...registerables);
 
@@ -21,31 +21,28 @@ interface SpreadHistogramProps {
   duration2: string;
 }
 
-export default function SpreadHistogram({ data, duration1, duration2 }: SpreadHistogramProps) {
+const SpreadHistogram = ({ data, duration1, duration2 }: SpreadHistogramProps) => {
   if (!data || !data.datasets || data.datasets.length < 2) {
-    return <div>No data available or insufficient datasets</div>; // Handle case where data is not available or insufficient
+    return <div>No data available or insufficient datasets</div>;
   }
 
-  // Define colors for the spread line
   const colors = {
-    spreadLine: '#FF5733', // Color for the spread line
+    spreadLine: '#FF5733',
   };
 
-  // Calculate the spread
-  const spreadData = data.datasets[0].data.map((value, index) => {
-    const secondValue = data.datasets[1].data[index];
-    return value - secondValue; // Calculate the spread
-  });
+  const calculateSpread = () => {
+    return data.datasets[0].data.map((value, index) => value - data.datasets[1].data[index]);
+  };
 
   const options: ChartOptions<'line'> = {
     responsive: true,
     scales: {
       x: {
-        type: 'time', // Ensure the x-axis is a time scale
+        type: 'time',
         time: {
-          tooltipFormat: 'MMM YYYY', // Format for tooltip
+          tooltipFormat: 'MMM YYYY',
           displayFormats: {
-            month: 'MMM YYYY', // Format for x-axis labels
+            month: 'MMM YYYY',
           },
         },
         title: {
@@ -69,47 +66,24 @@ export default function SpreadHistogram({ data, duration1, duration2 }: SpreadHi
         display: true,
         text: `Spread Between ${duration1}-Year and ${duration2}-Year Treasury Yields`,
       },
-      // Custom plugin to highlight positive spread area
-      beforeDraw: (chart) => {
-        const ctx = chart.ctx;
-        const yScale = chart.scales.y;
-        const xScale = chart.scales.x;
-
-        // Clear the area before drawing
-        ctx.clearRect(0, 0, chart.width, chart.height);
-
-        // Draw the positive spread area
-        ctx.save();
-        ctx.fillStyle = 'rgba(211, 211, 211, 0.5)'; // Light grey color
-
-        // Draw the area where the spread is positive
-        spreadData.forEach((value, index) => {
-          if (value > 0) {
-            const x = xScale.getPixelForValue(index);
-            const y = yScale.getPixelForValue(value);
-            ctx.fillRect(x, yScale.getPixelForValue(0), xScale.getPixelForValue(1) - 1, y - yScale.getPixelForValue(0));
-          }
-        });
-
-        ctx.restore();
-      },
     },
   };
 
-  // Ensure your labels are in date format
   const histogramData = {
-    labels: data.labels.map(label => new Date(label)), // Convert labels to Date objects
+    labels: data.labels.map(label => new Date(label)),
     datasets: [
       {
         label: `Spread (${duration1} - ${duration2})`,
-        data: spreadData, // Use the calculated spread data
+        data: calculateSpread(),
         borderColor: colors.spreadLine,
-        backgroundColor: 'rgba(255, 87, 51, 0.5)', // Semi-transparent fill for the spread line
-        fill: false, // Do not fill under the line
-        tension: 0.1, // Smooth the line
+        backgroundColor: 'rgba(255, 87, 51, 0.5)',
+        fill: false,
+        tension: 0.1,
       },
     ],
   };
 
   return <Line options={options} data={histogramData} />;
-}
+};
+
+export default SpreadHistogram;
